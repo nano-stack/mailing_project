@@ -1,14 +1,15 @@
-name: Ejecutar y enviar reporte Snowflake - LM
+name: Ejecutar y enviar reporte Snowflake - BHE ANALIZADOS CONTEO
 
 on:
-  workflow_dispatch:      # Permite ejecución manual desde Actions
-  push:                   # Ejecuta workflow al hacer push en main
+  schedule:
+    - cron: "0 */5 * * *"  # Cada 5 horas
+  workflow_dispatch: {}
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # Necesario para win32com y Outlook
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -19,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install snowflake-connector-python pandas
+          pip install snowflake-connector-python pandas pywin32
 
       - name: Run job
         env:
@@ -28,5 +29,6 @@ jobs:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
         run: python job.py
-
