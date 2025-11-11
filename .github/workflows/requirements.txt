@@ -1,0 +1,4 @@
+snowflake-connector-python
+pandas
+pywin32
+beautifulsoup4
