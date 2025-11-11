@@ -1,13 +1,16 @@
-name: Ejecutar y enviar reporte Snowflake - BHE ANALIZADOS CONTEO
+name: Ejecutar y enviar reporte Snowflake - LM
 
 on:
   schedule:
-    - cron: "0 */5 * * *"  # Cada 5 horas
+    - cron: "0 11 * * *"  # 08:00 America/Santiago cuando Chile está en UTC-3
+    - cron: "0 17 * * *"  # 14:00 America/Santiago cuando Chile está en UTC-3
+    - cron: "30 18 * * *"  # 15:30 en Chile cuando Chile está en UTC-3
   workflow_dispatch: {}
 
 jobs:
   run:
     runs-on: windows-latest  # Necesario para win32com y Outlook
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,19 +19,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install snowflake-connector-python pandas pywin32
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run job
         env:
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNWFLAKE_ACCOUNT }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-          MAIL_TO: ${{ secrets.MAIL_TO }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
         run: python job.py
